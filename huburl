@@ -63,10 +63,17 @@ def find-root []: string -> record<directory: string, scm: string> {
 # Get current repository branch
 def get-current-branch []: record<directory: string, scm: string> -> string {
   let ctx = $in
-  match $ctx.scm {
+  let branch = match $ctx.scm {
     jj => (jj log --no-graph -r 'heads(::@ & bookmarks())' -T 'remote_bookmarks.filter(|b| b.remote() != "git").map(|b| b.name()).join("\n")' | lines | first),
     git => (git rev-parse --abbrev-ref HEAD | lines | first)
   }
+  if ($branch | is-empty) {
+    match $ctx.scm {
+      jj => (error make {msg: "unable to determine remote bookmark", help: "Make sure the bookmark is tracked to a remote."})
+      git => (error make {msg: "unable to determine branch"})
+    }
+  }
+  $branch
 }
 
 # Transforms remote into a HTTPS URL
@@ -76,7 +83,7 @@ def transform-remote []: string -> string {
     $url | str replace "ssh.dev.azure.com:v3" "dev.azure.com" | str replace ":" "/" | str replace "git@" "https://"
   } else {
     $url
-  }
+  } | url parse | reject username password query port | update scheme https | url join
 }
 
 # Get remote
@@ -94,6 +101,13 @@ def get-remote [
   } else {
     $remotes
   } | sort-by -c {|a, b| if "origin" in [$a.name $b.name] { $a.name == "origin" } else { $a.name < $b.name }} | first
+  if ($remote | is-empty) {
+    if ($name | is-not-empty) {
+      error make {msg: "unable to find specified remote"}
+    } else {
+      error make {msg: "unable to determine remote"}
+    }
+  }
   {
     name: $remote.name
     url: ($remote.url | transform-remote)

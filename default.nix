@@ -1,4 +1,4 @@
-{pkgs, stdenv, ...}:
+{ pkgs, stdenv, ... }:
 stdenv.mkDerivation {
   pname = "huburl";
   version = "1.0";
@@ -6,7 +6,14 @@ stdenv.mkDerivation {
   # Point to the directory containing your script
   src = ./.;
 
-  nativeBuildInputs = [ pkgs.nushell ];
+  nativeBuildInputs = (
+    with pkgs;
+    [
+      nushell
+      jujutsu
+      git
+    ]
+  );
 
   installPhase = ''
     mkdir -p $out/bin

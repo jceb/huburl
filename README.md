@@ -23,19 +23,29 @@ Parameters:
 ```
 
 > [!IMPORTANT]
-> `ssh` commands are supported and converted to `https` automatically. Shortened
+> `ssh` remmotes are supported and converted to `https` automatically. Shortened
 > paths such as `git@github.com:someone/repo.git` are only supported if they
 > begin with `git@`.
 
+## Dependencies
+
+- [`nushell`](https://nushell.sh) for executing the script itself
+- [`jujutsu`/`jj`](https://jj-vcs.dev/) to find bookmarks and remotes in jujutsu
+  repositories
+- [`git`](https://git-scm.com/) to find branches and remotes in git repositories
+
 ## Installation
 
-### Dependencies
+### Manual Installation
 
-- `nushell` for executing the script itself
-- `jujutsu`/`jj` to find bookmarks and remotes in jujutsu repositories
-- `git` to find branches and remotes in git repositories
+```sh
+curl -o /usr/local/bin/huburl https://github.com/jceb/huburl/raw/refs/heads/main/huburl
+chmod u+x /usr/local/bin/huburl
+cd my-repository
+huburl # generates the URL to your hub
+```
 
-### 1. Installation with Nix Flake
+### Installation with Nix Flake
 
 1. Add the `huburl` section to your
    [Flake](https://wiki.nixos.org/wiki/Flakes)'s `inputs`:
@@ -63,32 +73,17 @@ inputs = {
 
 (<https://wiki.nixos.org/wiki/Overlays#Using_overlays>)
 
-3. Rebuild your configuration and check if it works with `huburl --help`.
+3. Rebuild your configuration
+   (`nixos-rebuild switch --flake your-system-config`) and check if it works
+   with `huburl --help`.
 
-### 2. Manual Installation
-
-1. Clone the repository:
-
-```sh
-git clone https://github.com/jceb/huburl
-cd huburl
-```
-
-2. Make the file executable:
+4. Execute the file from inside a git or jujutsu repository:
 
 ```sh
-chmod u+x ./huburl
+huburl # generates the URL to your hub
 ```
 
-3. Execute the file from inside a git or jujutsu repository:
-
-```sh
-./huburl --help
-```
-
-You can also add the file to `$PATH` to use it anywhere.
-
-### 3. One-time Usage with `nix run`
+### One-time Usage with `nix run`
 
 ```sh
 nix run github:jceb/huburl

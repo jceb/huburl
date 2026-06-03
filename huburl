@@ -173,7 +173,7 @@ def join-url [
     $HUB_SRHT
   } else {
     log warning $"Unknown hub type, falling back to type ($HUB_GITLAB)"
-    log info $"Configure your custom hub in file ($CONFIG_PATH)\nSupported hub types: github, gitlab, gitea, forgjo, azure, srht\nSample configuration for this hub:\n\n[hubs.gitlab]\nhostnames = [ \"($url.host)\" ]"
+    log info $"Configure your custom hub in file ($CONFIG_PATH)\nSupported hub types: github, gitlab, gitea, forgejo, azure, srht\nSample configuration for this hub:\n\n[hubs.gitlab]\nhostnames = [ \"($url.host)\" ]"
     $HUB_GITLAB
   }
   log debug $"found a hub of type: ($hub_type)"
@@ -369,7 +369,7 @@ def main [
 ]: nothing -> string {
   if $test {
     test-join-url
-    exit 0
+    return
   }
   if $verbose {
     $env.NU_LOG_LEVEL = "debug"

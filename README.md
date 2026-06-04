@@ -22,8 +22,8 @@ Parameters:
   path <path>: File or directory path, defaults to root of the repository (optional)
 ```
 
-> [!IMPORTANT]
-> `ssh` remmotes are supported and converted to `https` automatically. Shortened
+> [!INFO]
+> `ssh` remotes are supported and converted to `https` automatically. Shortened
 > paths such as `git@github.com:someone/repo.git` are only supported if they
 > begin with `git@`.
 
@@ -60,7 +60,8 @@ inputs = {
 };
 ```
 
-2. Add the following to your `nixpkgs.overlays`:
+2. Add the following to your
+   [`nixpkgs.overlays`](https://wiki.nixos.org/wiki/Overlays#Using_overlays):
 
 ```nix
 (final: prev: {
@@ -70,8 +71,6 @@ inputs = {
   };
 })
 ```
-
-(<https://wiki.nixos.org/wiki/Overlays#Using_overlays>)
 
 3. Rebuild your configuration
    (`nixos-rebuild switch --flake your-system-config`) and check if it works

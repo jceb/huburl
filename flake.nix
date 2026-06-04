@@ -19,7 +19,7 @@
       perSystem =
         { pkgs, stdenv, ... }:
         {
-          packages.default = pkgs.callPackage ./default.nix { inherit pkgs stdenv };
+          packages.default = pkgs.callPackage ./default.nix { inherit pkgs stdenv; };
         };
     };
 }

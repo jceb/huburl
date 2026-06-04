@@ -349,6 +349,18 @@ def test-join-url [] {
   let res = $ctx | join-url $config $remote "main" --path {path: ".", linenr: "23"}
   let exp = "https://git.sr.ht/~example/repo/tree/main/.?view-source="
   assert ($res == $exp) $"When a repository and directory path with line number at sr.ht is provided, then the result should be a sr.ht url with a path and without the line number. Result: ($res), Expected: ($exp)"
+
+  # SSH URLs
+  let remote = {name: "origin", url: ("ssh://user@github.com:1234/example/repo" | transform-remote)}
+  let res = $ctx | join-url $config $remote "main"
+  let exp = "https://github.com/example/repo/tree/main/"
+  assert ($res == $exp) $"When a repository with an SSH remote URL is provided, then the result should be a URL with https and without port and username. Result: ($res), Expected: ($exp)"
+
+  let remote = {name: "origin", url: ("ssh://user:password@cloud.gitea.com:1234/example/repo" | transform-remote)}
+  let res = $ctx | join-url $config $remote "main"
+  let exp = "https://cloud.gitea.com/example/repo/src/branch/main/"
+  assert ($res == $exp) $"When a repository with an SSH user and password is provided, then the result should be a URL without username and password. Result: ($res), Expected: ($exp)"
+
   log info "All tests passed"
 }
 

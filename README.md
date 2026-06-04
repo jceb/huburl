@@ -22,7 +22,7 @@ Parameters:
   path <path>: File or directory path, defaults to root of the repository (optional)
 ```
 
-> [!INFO]
+> [!IMPORTANT]
 > `ssh` remotes are supported and converted to `https` automatically. Shortened
 > paths such as `git@github.com:someone/repo.git` are only supported if they
 > begin with `git@`.

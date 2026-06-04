@@ -54,7 +54,7 @@ huburl # generates the URL to your hub
 inputs = {
   # (...)
   huburl = {
-    url = "github:jceb/huburl";
+    url = "github:jceb/huburl/main";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 };
@@ -68,6 +68,7 @@ inputs = {
   # (...)
   huburl = import inputs.huburl {
     inherit system;
+    inherit (prev) pkgs stdenv;
   };
 })
 ```

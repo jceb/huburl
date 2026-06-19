@@ -1,7 +1,23 @@
 # huburl
 
-A tool for generating the URL of the current local repository and path in it's
-source control hub.
+A tool for generating the (git)hub URLs from your local repository.
+
+## Use Cases
+
+- Share precise URLs to files, directories and repositories with friends or
+  co-workers
+- Speed up your personal workflows when working with multiple repositories
+  across different hubs
+
+## Features
+
+- Generates file, file+line, directory and repository URLs
+- Discovers the current branch and adds it to the URL
+- Supports multiple remotes
+- Supported (git)hubs: Github, Gitlab, Gitea, Forgejo, Azure DevOps, SourceHut
+- Supports private hubs via a custom configuration
+- 3 actions: print, copy or open URLs
+- Work in Progress: Generate Pull Request URLs
 
 ## Usage
 
@@ -33,6 +49,8 @@ Parameters:
 - [`jujutsu`/`jj`](https://jj-vcs.dev/) to find bookmarks and remotes in jujutsu
   repositories
 - [`git`](https://git-scm.com/) to find branches and remotes in git repositories
+- `xsel` for copying URLs (Linux)
+- `xdg-open` for opening URLs (Linux)
 
 ## Installation
 

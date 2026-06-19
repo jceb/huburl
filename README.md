@@ -17,6 +17,7 @@ A tool for generating the (git)hub URLs from your local repository.
 - Supported (git)hubs: Github, Gitlab, Gitea, Forgejo, Azure DevOps, SourceHut
 - Supports private hubs via a custom configuration
 - 3 actions: print, copy or open URLs
+- Supports [git](https://git-scm.com) and [jujutsu](https://jj-vcs.dev/)
 - Work in Progress: Generate Pull Request URLs
 
 ## Usage

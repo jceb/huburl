@@ -1,3 +1,17 @@
+## [1.0.3] - 2026-06-19
+
+### 🚀 Features
+
+- Add macos support for opening and copying URLs
+
+### 📚 Documentation
+
+- Update nix installation instructions
+- Describe features and use cases
+
+### ⚙️ Miscellaneous Tasks
+
+- *(ci)* Make build process more generic
 ## [1.0.2] - 2026-06-19
 
 ### 🚀 Features

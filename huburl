@@ -5,7 +5,7 @@
 use std/log
 # use std/clip # once clipboard support lands in nushell
 
-let VERSION = "1.0.2"
+let VERSION = "1.0.3"
 
 # Get git root
 def find-git-root []: nothing -> string {

@@ -15,3 +15,4 @@ _bump_files CURRENT_VERSION NEW_VERSION:
     #!/usr/bin/env nu
     let current_version = "{{ CURRENT_VERSION }}"
     let new_version = "{{ NEW_VERSION }}"
+    open --raw huburl | lines | str replace -r '^let VERSION = ".*"' $'let VERSION = "($new_version)"' | str join "\n" | collect | save -f huburl

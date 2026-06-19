@@ -68,7 +68,7 @@ inputs = {
   # (...)
   huburl = import inputs.huburl {
     inherit system;
-    inherit (prev) pkgs stdenv;
+    inherit (prev) pkgs;
   };
 })
 ```

@@ -1,3 +1,8 @@
+## [1.0.2] - 2026-06-19
+
+### 🚀 Features
+
+- Add flag for printing the script's version
 ## [1.0.1] - 2026-06-19
 
 ### ⚙️ Miscellaneous Tasks

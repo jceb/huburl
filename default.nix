@@ -19,6 +19,8 @@ stdenv.mkDerivation {
       nushell
       jujutsu
       git
+      xsel # for coyping URLs
+      xdg-utils # for opening URLs
     ]
   );
 

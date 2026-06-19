@@ -1,12 +1,19 @@
-{ pkgs, stdenv, ... }:
+{
+  pkgs ? import <nixpkgs> { },
+  stdenv ? pkgs.stdenv,
+  ...
+}:
+let
+  manifest = pkgs.lib.importJSON ./manifest.json;
+in
 stdenv.mkDerivation {
-  pname = "huburl";
-  version = "1.0";
+  pname = manifest.name;
+  version = manifest.version;
 
   # Point to the directory containing your script
   src = ./.;
 
-  nativeBuildInputs = (
+  buildInputs = (
     with pkgs;
     [
       nushell

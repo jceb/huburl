@@ -17,9 +17,9 @@
         "x86_64-darwin"
       ];
       perSystem =
-        { pkgs, stdenv, ... }:
+        { pkgs, ... }:
         {
-          packages.default = pkgs.callPackage ./default.nix { inherit pkgs stdenv; };
+          packages.default = pkgs.callPackage ./default.nix { inherit pkgs; };
         };
     };
 }

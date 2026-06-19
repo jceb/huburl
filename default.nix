@@ -24,7 +24,7 @@ stdenv.mkDerivation {
 
   installPhase = ''
     mkdir -p $out/bin
-    cp huburl $out/bin
-    chmod +x $out/bin/huburl
+    cp ${manifest.name} $out/bin
+    chmod +x $out/bin/${manifest.name}
   '';
 }

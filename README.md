@@ -1,6 +1,6 @@
 # huburl
 
-A tool for generating the (git)hub URLs from your local repository.
+A tool like `gh browse` for generating the (git)hub URLs from your local repository.
 
 ## Use Cases
 

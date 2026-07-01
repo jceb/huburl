@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 use std/log
-# use std/clip # once clipboard support lands in nushell
+use std/clip
 
 let VERSION = "1.0.3"
 
@@ -414,14 +414,6 @@ def main [
     }
     run-external $cmd $url
   }
-  if $copy {
-    let cmd = if ((sys host).long_os_version | str starts-with "Linux") {
-      ["xsel", "-i"]
-    } else {
-      ["pbcopy"]
-    }
-    $url | run-external $cmd
-  }
-  # if $copy { $url | clip copy } # once clipboard support lands in nushell
+  if $copy { $url | clip copy }
   $url
 }

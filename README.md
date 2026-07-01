@@ -50,7 +50,6 @@ Parameters:
 - [`jujutsu`/`jj`](https://jj-vcs.dev/) to find bookmarks and remotes in jujutsu
   repositories
 - [`git`](https://git-scm.com/) to find branches and remotes in git repositories
-- `xsel` for copying URLs (Linux)
 - `xdg-open` for opening URLs (Linux)
 
 ## Installation
@@ -146,3 +145,10 @@ hostnames = [ "git.example.com" ]
 ```
 
 Supported hub types: `github`, `gitlab`, `gitea`, `forgejo`, `azure`, `srht`
+
+### Tmux
+
+The `--copy` option doesn't work inside tmux by default, to fix it set:
+```
+set -g set-clipboard on
+```

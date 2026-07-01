@@ -158,6 +158,10 @@ def join-url [
   # Branch
   --path (-p): record<path: string, linenr: string>
   # Path to file or directory
+  --upstream-remote (-P): record<name: string, url: string>
+  # PR
+  --upstream-branch: string
+  # Set branch of upstream remote
 ]: record<directory: string, scm: string> -> string {
   let ctx = $in
   let url = $remote.url | url parse
@@ -178,8 +182,11 @@ def join-url [
     log info $"Configure your custom hub in file ($CONFIG_PATH)\nSupported hub types: github, gitlab, gitea, forgejo, azure, srht\nSample configuration for this hub:\n\n[hubs.gitlab]\nhostnames = [ \"($url.host)\" ]"
     $HUB_GITLAB
   }
+  let upstream_branch = if ($upstream_branch | is-empty) { "main" } else { $upstream_branch }
   log debug $"found a hub of type: ($hub_type)"
   mut segment = if $hub_type in [$HUB_GITEA $HUB_FORGEJO] { "src/branch" } else if $hub_type in [$HUB_AZURE] { "" } else { "tree" }
+  if ($upstream_remote | is-not-empty) and ($hub_type != $HUB_GITLAB) { $segment = "compare" }
+  if ($upstream_remote | is-not-empty) and ($hub_type == $HUB_GITLAB) { $segment = "" }
   mut fragment = ""
   let params = if $hub_type in [$HUB_AZURE] {
     [{key: version, value: $"GB($branch)" }] | if ($path | is-not-empty) and ($path.path | is-not-empty) {
@@ -187,28 +194,59 @@ def join-url [
     } else { $in }
   } else if $hub_type in [$HUB_SRHT] {
     [{key: "view-source", value: "" }]
+  } else if $hub_type in [$HUB_GITLAB] and ($upstream_remote | is-not-empty) {
+    [{key: "merge_request[source_branch]", value: $"($branch)"}]
   } else {
     []
   }
-  let branch = if $hub_type in [$HUB_AZURE] { "" } else { $branch }
-  let path = if ($path | is-not-empty) {
-    if $hub_type in [$HUB_GITHUB $HUB_GITLAB $HUB_GITEA $HUB_FORGEJO $HUB_SRHT] {
-      let type = [$ctx.directory $path.path] | path join | path type
-      if $hub_type in [$HUB_GITHUB $HUB_GITLAB $HUB_SRHT] {
-        $segment = if $type != "dir" { if $hub_type in [$HUB_SRHT] { "tree" } else { "blob" }} else { $segment }
-      }
-      if ($path.linenr | is-not-empty) and $type != "dir" {
-        $fragment = $"L($path.linenr)"
-      }
-      $path.path
-    } else {
-      ""
+  let branch = if $hub_type in [$HUB_AZURE] {
+    if ($upstream_remote | is-not-empty) {
+      error make $"($HUB_AZURE) is not supported for PRs"
     }
+    ""
+  } else if ($upstream_remote | is-not-empty) {
+    mut repo = $remote.url | split row / | last 2
+    $repo.1 = $repo.1 | str replace -r ".git$" ""
+    if $hub_type in [$HUB_GITHUB] {
+      [$upstream_branch, "...", $repo.0, ":", $repo.1, ":", $branch] | str join
+    } else if $hub_type in [$HUB_GITEA $HUB_FORGEJO] {
+      [$upstream_branch, "...", $repo.0, "/", $repo.1, ":", $branch] | str join
+    } else if $hub_type in [$HUB_SRHT] {
+      error make $"($HUB_SRHT) is not supported due to it using email, instead of a webui\nsee: https://man.sr.ht/tutorials"
+    } else if $hub_type in [$HUB_GITLAB] {
+      if $remote.url != $upstream_remote.url {
+        error make $"($HUB_GITLAB) only supports PRs where the repo and the upstream repo are the same"
+      }
+      # The rest must be set in params
+      "-/merge_requests/new"
+    }
+  } else { $branch }
+  let path = if ($upstream_remote | is-empty) {
+    if ($path | is-not-empty) {
+      if $hub_type != $HUB_AZURE {
+        let type = [$ctx.directory $path.path] | path join | path type
+        if $hub_type in [$HUB_GITHUB $HUB_GITLAB $HUB_SRHT] {
+          $segment = if $type != "dir" { if $hub_type in [$HUB_SRHT] { "tree" } else { "blob" }} else { $segment }
+        }
+        if ($path.linenr | is-not-empty) and $type != "dir" {
+          $fragment = $"L($path.linenr)"
+        }
+        $path.path
+      } else {
+        ""
+      }
+    } else {""}
   } else {""}
   let url = if $hub_type in [$HUB_AZURE] {
     let p = $url.path | path split; $url | update path ($p | if ($p | get ($p | length | $in - 2)) != "_git" {insert ($p | length | $in - 1) _git} else {$p} | path join)
+  } else if ($upstream_remote | is-not-empty) {
+    $upstream_remote.url | url parse
   } else { $url }
-  $url | reject query | reject username | reject password | update path ([($url.path | str replace -r ".git$" "") $segment $branch $path] | path join) | update params ($in.params | append $params) | update fragment $fragment | url join
+  let url = $url | reject query | reject username | reject password | update path ([($url.path | str replace -r ".git$" "") $segment $branch $path] | path join) | update params ($in.params | append $params) | update fragment $fragment | url join
+  let url = if ($hub_type == $HUB_GITLAB) and ($upstream_remote | is-not-empty) {
+    $url | str replace -r "merge_request%5Bsource_branch%5D=" "merge_request%5Bsource_branch%5D%3D"
+  } else { $url }
+  $url
 }
 
 def test-join-url [] {
@@ -220,7 +258,7 @@ def test-join-url [] {
   let remote = {name: "origin", url: ("git@github.com:example/repo.git" | transform-remote)}
   let res = $ctx | join-url $config $remote "main"
   let exp = "https://github.com/example/repo/tree/main/"
-  assert ($res == $exp) $"When a github repository is provided, then the result should be a gitea url. Result: ($res), Expected: ($exp)"
+  assert ($res == $exp) $"When a github repository is provided, then the result should be a github url. Result: ($res), Expected: ($exp)"
 
   let remote = {name: "origin", url: ("https://github.com/example/repo" | transform-remote)}
   let res = $ctx | join-url $config $remote "main"
@@ -239,11 +277,17 @@ def test-join-url [] {
   let exp = "https://github.com/example/repo/tree/main/."
   assert ($res == $exp) $"When a repository and directory path with line number at github is provided, then the result should be a github url with a path and without the line number. Result: ($res), Expected: ($exp)"
 
+  # PR
+  let upstream_remote = {name: "upstream", url: ("https://github.com/example/upstream-repo" | transform-remote)}
+  let res = $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+  let exp = "https://github.com/example/upstream-repo/compare/main...example:repo:main/"
+  assert ($res == $exp) $"When a repository and a upstream remote at github is provided the result should be a github url comparing the remote and upstream remote. Result: ($res), Expected: ($exp)"
+
   # GitLab
   let remote = {name: "origin", url: ("git@gitlab.com:example/repo.git" | transform-remote)}
   let res = $ctx | join-url $config $remote "main"
   let exp = "https://gitlab.com/example/repo/tree/main/"
-  assert ($res == $exp) $"When a gitlab repository is provided, then the result should be a gitea url. Result: ($res), Expected: ($exp)"
+  assert ($res == $exp) $"When a gitlab repository is provided, then the result should be a gitlab url. Result: ($res), Expected: ($exp)"
 
   let remote = {name: "origin", url: ("https://gitlab.com/example/repo" | transform-remote)}
   let res = $ctx | join-url $config $remote "main"
@@ -261,6 +305,19 @@ def test-join-url [] {
   let res = $ctx | join-url $config $remote "main" --path {path: ".", linenr: "23"}
   let exp = "https://gitlab.com/example/repo/tree/main/."
   assert ($res == $exp) $"When a repository and directory path with line number at gitlab is provided, then the result should be a gitlab url with a path and without the line number. Result: ($res), Expected: ($exp)"
+
+  # PR
+  let upstream_remote = {name: "upstream", url: ("https://gitlab.com/example/upstream-repo" | transform-remote)}
+  let res = try {
+    $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+    false
+  } catch { true }
+  let exp = true
+  assert ($res == $exp) "When a gitlab repository is provided, attempting to create a pr, the source and target repo are not the same should error"
+
+  let res = $ctx | join-url $config $remote "main" --upstream-remote $remote
+  let exp = "https://gitlab.com/example/repo/-/merge_requests/new/?merge_request%5Bsource_branch%5D%3Dmain"
+  assert ($res == $exp) $"When a gitlab repository is provided, creating a pr at the same remote should create a PR url with params. Result: ($res), Expected: ($exp)"
 
   # Gitea
   # TODO: find a proper SSH URL
@@ -281,6 +338,12 @@ def test-join-url [] {
   let exp = "https://cloud.gitea.com/example/repo/src/branch/main/."
   assert ($res == $exp) $"When a repository and directory path with line number at gitea is provided, then the result should be a gitea url with a path and without the line number. Result: ($res), Expected: ($exp)"
 
+  # PR
+  let upstream_remote = {name: "upstream", url: ("https://cloud.gitea.com/example/upstream-repo" | transform-remote)}
+  let res = $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+  let exp = "https://cloud.gitea.com/example/upstream-repo/compare/main...example/repo:main/"
+  assert ($res == $exp) $"When a repository and a upstream remote at gitea is provided the result should be a gitea url comparing the remote and upstream remote. Result: ($res), Expected: ($exp)"
+
   # Forgejo
   # TODO: find a proper SSH URL
 
@@ -300,6 +363,12 @@ def test-join-url [] {
   let res = $ctx | join-url $config $remote "main" --path {path: ".", linenr: "23"}
   let exp = "https://codeberg.org/example/repo/src/branch/main/."
   assert ($res == $exp) $"When a repository and directory path with line number at forgejo is provided, then the result should be a forgejo url with a path and without the line number. Result: ($res), Expected: ($exp)"
+
+  # PR
+  let upstream_remote = {name: "upstream", url: ("https://codeberg.org/example/upstream-repo" | transform-remote)}
+  let res = $ctx | join-url $config $remote "main" --upstream-remote  $upstream_remote
+  let exp = "https://codeberg.org/example/upstream-repo/compare/main...example/repo:main/"
+  assert ($res == $exp) $"When a repository and a upstream remote at forgejo is provided the result should be a forgejo url comparing the remote and upstream remote. Result: ($res), Expected: ($exp)"
 
   # Azure DevOps
   let remote = {name: "origin", url: ("git@ssh.dev.azure.com:v3/ORG/PROJECT/repo" | transform-remote)}
@@ -329,6 +398,15 @@ def test-join-url [] {
   let exp = "https://dev.azure.com/ORG/PROJECT/_git/repo/?version=GBmain&path=."
   assert ($res == $exp) $"When a repository and directory path with line number at azure is provided, then the result should be an azure url with a path and without the line number. Result: ($res), Expected: ($exp)"
 
+  # PR (not supported, should fail)
+  let upstream_remote = {name: "upstream", url: ("https://user@dev.azure.com/ORG/UPSTREAM-PROJECT/_git/repo" | transform-remote)}
+  let res = try {
+    $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+  } catch { true }
+  let exp = true
+  # TODO: expand error
+  assert ($res == $exp)
+  
   # Source Hut
   let remote = {name: "origin", url: ("git@git.sr.ht:~example/repo" | transform-remote)}
   let res = $ctx | join-url $config $remote "main"
@@ -351,6 +429,16 @@ def test-join-url [] {
   let res = $ctx | join-url $config $remote "main" --path {path: ".", linenr: "23"}
   let exp = "https://git.sr.ht/~example/repo/tree/main/.?view-source="
   assert ($res == $exp) $"When a repository and directory path with line number at sr.ht is provided, then the result should be a sr.ht url with a path and without the line number. Result: ($res), Expected: ($exp)"
+
+  # PR (not supported, should fail)
+  let upstream_remote = {name: "upstream", url: ("https://git.sr.ht/~example/upstream-repo" | transform-remote)}
+  let res = try {
+    $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+    false
+  } catch { true }
+  let exp = true
+  # TODO: expand error
+  assert ($res == $exp)
 
   # SSH URLs
   let remote = {name: "origin", url: ("ssh://user@github.com:1234/example/repo" | transform-remote)}
@@ -380,6 +468,12 @@ def main [
   # Verbose log output
   --version (-V)
   # Print huburl version
+  --pr (-P)
+  # Create PR
+  --remote-pr (-R): string
+  # Name of remote
+  --branch-pr (-B): string
+  # Name of target branch for PR, defaults to main
   --test
   # Run tests (just for development)
 ]: nothing -> string {
@@ -404,7 +498,21 @@ def main [
   let path = $path | update path ($in.path | path relative-to $ctx.directory)
   log debug $"relative path: ($path)"
   let config = load-config
-  let url = $ctx | join-url $config $remote $branch --path $path
+  let remote_pr = if ($remote_pr | is-empty) { "upstream" } else { $remote_pr }
+  log debug $"remote pr: ($remote_pr)"
+  let branch_pr = if ($branch_pr | is-empty) { "main" } else { $branch_pr }
+  log debug $"branch pr: ($branch_pr)"
+  let upstream_remote = try {
+    $ctx | get-remote $remote_pr
+  } catch {
+    $ctx | get-remote $remote.name
+  }
+  log debug $"current upstream: ($upstream_remote)"
+  let url = if $pr {
+    $ctx | join-url $config $remote $branch --upstream-remote $upstream_remote --upstream-branch $branch_pr
+  } else {
+    $ctx | join-url $config $remote $branch --path $path
+  }
   log debug $"url: ($url)"
   if $open {
     let cmd = if ((sys host).long_os_version | str starts-with "Linux") {

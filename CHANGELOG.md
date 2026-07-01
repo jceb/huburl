@@ -1,60 +1,82 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [1.1.0] - 2026-07-01
+
+### Added Features
+
+- [f04f7ac](https://forge.41ppl.com/identinet/huburl/commit/f04f7ace8c1e4b7cc8ec17743861883acec0792c) Add PR support
+
+### Documentation
+
+- [f01704e](https://forge.41ppl.com/identinet/huburl/commit/f01704ec04a232a0f2b38324bffd0bb4e220cf8a) List supported VCS'
+- [913bce4](https://forge.41ppl.com/identinet/huburl/commit/913bce416ab5fda4a681fc73f3afd5c2e53a9fd4) Add vim integration
+- [153d6b4](https://forge.41ppl.com/identinet/huburl/commit/153d6b4454a3df72ab7849d1407ce1db897bd965) Update claim in documentation
+- [28bc377](https://forge.41ppl.com/identinet/huburl/commit/28bc377d6759bc64e896b024ad83428839902e4c) Correct vim plugin
+
+### Miscellaneous Tasks
+
+- [**breaking**] [c3f8b53](https://forge.41ppl.com/identinet/huburl/commit/c3f8b5351ea1dd68c0e15208412bfdbb643cd474) Migrate clipboard integration to std/clip
+
 ## [1.0.3] - 2026-06-19
 
-### 🚀 Features
+### Added Features
 
-- Add macos support for opening and copying URLs
+- [be7bf79](https://forge.41ppl.com/identinet/huburl/commit/be7bf7918d6866ff014886c0a4b513c30d900876) Add macos support for opening and copying URLs
 
-### 📚 Documentation
+### Documentation
 
-- Update nix installation instructions
-- Describe features and use cases
+- [26295ed](https://forge.41ppl.com/identinet/huburl/commit/26295ed574d6779e17afc0a7d75cc0ff110771a0) Update nix installation instructions
+- [22df599](https://forge.41ppl.com/identinet/huburl/commit/22df5992e41d3e1ce15497dbf8c2e418133b8b12) Describe features and use cases
 
-### ⚙️ Miscellaneous Tasks
-
-- *(ci)* Make build process more generic
 ## [1.0.2] - 2026-06-19
 
-### 🚀 Features
+### Added Features
 
-- Add flag for printing the script's version
+- [c5e8d02](https://forge.41ppl.com/identinet/huburl/commit/c5e8d0281d09ebc09ae623990ef7a3e7bc7f068f) Add flag for printing the script's version
+
 ## [1.0.1] - 2026-06-19
 
-### ⚙️ Miscellaneous Tasks
+### Miscellaneous Tasks
 
-- Add justfile
+- [d5a7b03](https://forge.41ppl.com/identinet/huburl/commit/d5a7b0394060e8e93fd190d64c18c21b79880c7a) Add justfile
+
 ## [1.0.0] - 2026-06-04
 
-### 🚀 Features
+### Added Features
 
-- Add huburl script and default.nix
+- [0db0a0f](https://forge.41ppl.com/identinet/huburl/commit/0db0a0f8007d21b23525583e82ef0b5d3e4a5628) Add huburl script and default.nix
 
-### 🐛 Bug Fixes
+### Bug Fixes
 
-- Add correct copyright to LICENSE
-- Handle missing bookmarks and remotes
-- *(test)* Replace exit with return
-- *(flake)* Pass mandatory arguments to package
-- *(flake)* Correct syntax error
+- [0d23ccd](https://forge.41ppl.com/identinet/huburl/commit/0d23ccdbb884efdace564525b285ad26875109a6) Add correct copyright to LICENSE
+- [54a2ddc](https://forge.41ppl.com/identinet/huburl/commit/54a2ddc219bfc0b4ad58db6f255eacb055393967) Handle missing bookmarks and remotes
+- [cf98099](https://forge.41ppl.com/identinet/huburl/commit/cf98099ca5480d84d9c06b6cf6803c48da97f8dd) Replace exit with return
+- [7a5d06f](https://forge.41ppl.com/identinet/huburl/commit/7a5d06f837e60ebb3e7636941695b9a72056ea05) Pass mandatory arguments to package
+- [312b133](https://forge.41ppl.com/identinet/huburl/commit/312b133375489acad27f9b72e1d286a43d7a3ea7) Correct syntax error
 
-### 💼 Other
+### Documentation
 
-- Add flake.nix
-- Use nixos-26.05 instead of nixos-unstable
-- Use nixos-unstable again
+- [5c755b6](https://forge.41ppl.com/identinet/huburl/commit/5c755b67c3852f489f7f38100dba550b17237119) Update README
+- [49c36ca](https://forge.41ppl.com/identinet/huburl/commit/49c36ca471152f74288c610cc554bc2ebe7b9e73) Add Installation section
+- [61e3951](https://forge.41ppl.com/identinet/huburl/commit/61e39513b2b5f2c4f3d9ac1e7b4c2b5836a4c8d5) Update readme
+- [eef20e8](https://forge.41ppl.com/identinet/huburl/commit/eef20e805f692a413364b93ace6a50a7669d8b41) Correct typos
+- [eb206b0](https://forge.41ppl.com/identinet/huburl/commit/eb206b06ed748b0fe23e3e534430171e80eea92e) Correct typos
+- [6e96c73](https://forge.41ppl.com/identinet/huburl/commit/6e96c73a60cd2dd7ed3e5a0eb2d9f98d0ef1dd45) Correct error in nix configuration
 
-### 📚 Documentation
+### Miscellaneous Tasks
 
-- Update README
-- Add Installation section
-- Update readme
-- Correct typos
-- Correct typos
-- Correct error in nix configuration
+- [1868184](https://forge.41ppl.com/identinet/huburl/commit/186818470bb6a79f502f26037d2185752637558b) Add lockfile
 
-### 🧪 Testing
+### Other
 
-- Add SSH URLs
+- [fe61f91](https://forge.41ppl.com/identinet/huburl/commit/fe61f916f4129158925bb69a603f4a5f9485c96b) Add flake.nix
+- [5ff90dd](https://forge.41ppl.com/identinet/huburl/commit/5ff90ddc075c4ad6ea4852bd896177ed93678ad6) Use nixos-26.05 instead of nixos-unstable
+- [e4b8ed2](https://forge.41ppl.com/identinet/huburl/commit/e4b8ed28ec23dd26e9c93d35dbc88ba3c3b9ce31) Use nixos-unstable again
 
-### ⚙️ Miscellaneous Tasks
+### Testing
 
-- *(flake)* Add lockfile
+- [237a8b0](https://forge.41ppl.com/identinet/huburl/commit/237a8b0810ea89513049d106a25c378adec3ded8) Add SSH URLs
+
+<!-- generated by git-cliff -->

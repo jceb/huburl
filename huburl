@@ -182,6 +182,13 @@ def join-url [
     log info $"Configure your custom hub in file ($CONFIG_PATH)\nSupported hub types: github, gitlab, gitea, forgejo, azure, srht\nSample configuration for this hub:\n\n[hubs.gitlab]\nhostnames = [ \"($url.host)\" ]"
     $HUB_GITLAB
   }
+  if ($upstream_remote | is-not-empty) {
+    let first = $remote.url | url parse | get host
+    let second = $upstream_remote.url | url parse | get host
+    if ($first != $second) {
+      error make "Cannot create PR when upstream is on different remote"
+    }
+  }
   let upstream_branch = if ($upstream_branch | is-empty) { "main" } else { $upstream_branch }
   log debug $"found a hub of type: ($hub_type)"
   mut segment = if $hub_type in [$HUB_GITEA $HUB_FORGEJO] { "src/branch" } else if $hub_type in [$HUB_AZURE] { "" } else { "tree" }
@@ -283,6 +290,15 @@ def test-join-url [] {
   let exp = "https://github.com/example/upstream-repo/compare/main...example:repo:main/"
   assert ($res == $exp) $"When a repository and a upstream remote at github is provided the result should be a github url comparing the remote and upstream remote. Result: ($res), Expected: ($exp)"
 
+  # PR to different hub
+  let upstream_remote = {name: "upstream", url: ("https://gitlab.com/example/upstream-repo" | transform-remote)}
+  let res = try {
+    $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+    false
+  } catch { true }
+  let exp = true
+  assert ($res == $exp) "When a repo at github and a upstream repo at a different remote is provided then the result should be a error"
+
   # GitLab
   let remote = {name: "origin", url: ("git@gitlab.com:example/repo.git" | transform-remote)}
   let res = $ctx | join-url $config $remote "main"
@@ -319,6 +335,15 @@ def test-join-url [] {
   let exp = "https://gitlab.com/example/repo/-/merge_requests/new/?merge_request%5Bsource_branch%5D%3Dmain"
   assert ($res == $exp) $"When a gitlab repository is provided, creating a pr at the same remote should create a PR url with params. Result: ($res), Expected: ($exp)"
 
+  # PR to different hub
+  let upstream_remote = {name: "upstream", url: ("https://cloud.gitea.com/example/upstream-repo" | transform-remote)}
+  let res = try {
+    $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+    false
+  } catch { true }
+  let exp = true
+  assert ($res == $exp) "When a repo at gitlab and a upstream repo at a different remote is provided then the result should be a error"
+
   # Gitea
   # TODO: find a proper SSH URL
   let remote = {name: "origin", url: ("https://cloud.gitea.com/example/repo" | transform-remote)}
@@ -343,6 +368,15 @@ def test-join-url [] {
   let res = $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
   let exp = "https://cloud.gitea.com/example/upstream-repo/compare/main...example/repo:main/"
   assert ($res == $exp) $"When a repository and a upstream remote at gitea is provided the result should be a gitea url comparing the remote and upstream remote. Result: ($res), Expected: ($exp)"
+
+  # PR to different hub
+  let upstream_remote = {name: "upstream", url: ("https://codeberg.org/example/upstream-repo" | transform-remote)}
+  let res = try {
+    $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+    false
+  } catch { true }
+  let exp = true
+  assert ($res == $exp) "When a repo at gitea and a upstream repo at a different remote is provided then the result should be a error"
 
   # Forgejo
   # TODO: find a proper SSH URL
@@ -369,6 +403,15 @@ def test-join-url [] {
   let res = $ctx | join-url $config $remote "main" --upstream-remote  $upstream_remote
   let exp = "https://codeberg.org/example/upstream-repo/compare/main...example/repo:main/"
   assert ($res == $exp) $"When a repository and a upstream remote at forgejo is provided the result should be a forgejo url comparing the remote and upstream remote. Result: ($res), Expected: ($exp)"
+
+  # PR to different hub
+  let upstream_remote = {name: "upstream", url: ("https://user@dev.azure.com/ORG/PROJECT/_git/upstream-repo" | transform-remote)}
+  let res = try {
+    $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+    false
+  } catch { true }
+  let exp = true
+  assert ($res == $exp) "When a repo at forgejo and a upstream repo at a different remote is provided then the result should be a error"
 
   # Azure DevOps
   let remote = {name: "origin", url: ("git@ssh.dev.azure.com:v3/ORG/PROJECT/repo" | transform-remote)}
@@ -406,6 +449,15 @@ def test-join-url [] {
   let exp = true
   # TODO: expand error
   assert ($res == $exp)
+
+  # PR to different hub
+  let upstream_remote = {name: "upstream", url: ("https://git.sr.ht/~example/repo" | transform-remote)}
+  let res = try {
+    $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+    false
+  } catch { true }
+  let exp = true
+  assert ($res == $exp) "When a repo at azure and a upstream repo at a different remote is provided then the result should be a error"
   
   # Source Hut
   let remote = {name: "origin", url: ("git@git.sr.ht:~example/repo" | transform-remote)}
@@ -439,6 +491,15 @@ def test-join-url [] {
   let exp = true
   # TODO: expand error
   assert ($res == $exp)
+
+  # PR to different hub
+  let upstream_remote = {name: "upstream", url: ("https://github.com/example/upstream-repo" | transform-remote)}
+  let res = try {
+    $ctx | join-url $config $remote "main" --upstream-remote $upstream_remote
+    false
+  } catch { true }
+  let exp = true
+  assert ($res == $exp) "When a sr.ht repo is provided and a upstream repo at a different remote is provided then the result should be a error"
 
   # SSH URLs
   let remote = {name: "origin", url: ("ssh://user@github.com:1234/example/repo" | transform-remote)}

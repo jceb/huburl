@@ -188,6 +188,11 @@ def join-url [
     if ($first != $second) {
       error make "Cannot create PR when upstream is on different remote"
     }
+    let first = $remote.url | url parse | get path
+    let second = $upstream_remote.url | url parse | get path
+    if ($first == $second) and ($branch == $upstream_branch) {
+      error make "Cannot create PR when repo and branch are the same"
+    }
   }
   let upstream_branch = if ($upstream_branch | is-empty) { "main" } else { $upstream_branch }
   log debug $"found a hub of type: ($hub_type)"

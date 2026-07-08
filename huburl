@@ -5,7 +5,7 @@
 use std/log
 use std/clip
 
-let VERSION = "1.1.0"
+let VERSION = "1.1.1"
 
 # Get git root
 def find-git-root []: nothing -> string {

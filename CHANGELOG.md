@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2026-07-08
+
+### Bug Fixes
+
+- [2058a45](https://forge.41ppl.com/identinet/huburl/commit/2058a45d190a80b7d2d59f540863388661dd258a) Errror when attempting to create a pr to a different remote
+- [7550616](https://forge.41ppl.com/identinet/huburl/commit/755061689ab53145d9edb683d6d2af87a36a781b) Error when attempting to create PR to same repo and same branch
+
 ## [1.1.0] - 2026-07-01
 
 ### Added Features

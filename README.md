@@ -1,6 +1,7 @@
 # huburl
 
-A tool like `gh browse` for generating the (git)hub URLs from your local repository.
+A tool like `gh browse` for generating the (git)hub URLs from your local
+repository.
 
 ## Use Cases
 
@@ -33,7 +34,12 @@ Flags:
   -c, --copy: Copy URL into the clipboard
   -r, --remote <string>: Specific remote name, defaults to the first remote
   -v, --verbose: Verbose log output
-  --test: Run tests
+  -V, --version: Print huburl version
+  -P, --pr: Create PR
+  -R, --remote-pr <string>: Name of remote
+  -B, --branch-pr <string>: Name of target branch for PR, defaults to main
+  --test: Run tests (just for development)
+
 
 Parameters:
   path <path>: File or directory path, defaults to root of the repository (optional)
@@ -149,6 +155,7 @@ Supported hub types: `github`, `gitlab`, `gitea`, `forgejo`, `azure`, `srht`
 ### Tmux
 
 The `--copy` option doesn't work inside tmux by default, to fix it set:
+
 ```
 set -g set-clipboard on
 ```
